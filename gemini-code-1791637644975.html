@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chúc Mừng Sinh Nhật Chị</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050505;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            init();
+        });
+
+        // 1. Tạo bầu trời sao nền
+        const stars = [];
+        for (let i = 0; i < 200; i++) {
+            stars.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                size: Math.random() * 1.5 + 0.5,
+                alpha: Math.random(),
+                speed: Math.random() * 0.02 + 0.005
+            });
+        }
+
+        function drawStars() {
+            for (let star of stars) {
+                star.alpha += star.speed;
+                if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
+                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // 2. Lấy tọa độ các điểm chữ "Chúc mừng sinh nhật" & "Chị yêu dấu"
+        let targets = [];
+        function createTextTargets() {
+            targets = [];
+            const offscreenCanvas = document.createElement('canvas');
+            const offCtx = offscreenCanvas.getContext('2d');
+            offscreenCanvas.width = width;
+            offscreenCanvas.height = height;
+
+            // Tính toán kích thước chữ phù hợp màn hình
+            let fontSize = Math.min(width / 12, 60);
+            offCtx.font = `bold ${fontSize}px Arial`;
+            offCtx.fillStyle = '#ffffff';
+            offCtx.textAlign = 'center';
+
+            // Vẽ chữ lên canvas ẩn
+            offCtx.fillText("Chúc mừng sinh nhật", width / 2, height / 2 - fontSize * 0.7);
+            offCtx.fillText("Chị yêu dấu", width / 2, height / 2 + fontSize * 0.9);
+
+            // Quét các điểm ảnh
+            const imgData = offCtx.getImageData(0, 0, width, height).data;
+            const step = Math.max(2, Math.floor(fontSize / 15)); // Khoảng cách giữa các hạt
+
+            for (let y = 0; y < height; y += step) {
+                for (let x = 0; x < width; x += step) {
+                    const index = (y * width + x) * 4;
+                    if (imgData[index + 3] > 128) { // Điểm hiển thị chữ
+                        targets.push({ x: x, y: y });
+                    }
+                }
+            }
+        }
+
+        // 3. Quản lý Hạt sáng (Particles)
+        class Particle {
+            constructor(target, delay) {
+                this.targetX = target.x;
+                this.targetY = target.y;
+                
+                // Bắt đầu từ góc dưới bên trái
+                this.x = -50;
+                this.y = height + 50;
+
+                this.delay = delay;
+                this.progress = 0;
+                this.speed = 0.012; // Tốc độ chạy vệt
+                this.arrived = false;
+
+                // Màu sắc cháy nổ ngẫu nhiên (Cam, Đỏ, Vàng)
+                const colors = ['#ff4500', '#ff8c00', '#ff2200', '#ffd700', '#ff6347'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.size = Math.random() * 2 + 1.5;
+            }
+
+            update() {
+                if (this.delay > 0) {
+                    this.delay--;
+                    return;
+                }
+
+                if (!this.arrived) {
+                    this.progress += this.speed;
+                    if (this.progress >= 1) {
+                        this.progress = 1;
+                        this.arrived = true;
+                    }
+                    // Di chuyển theo đường cong mượt đến vị trí chữ
+                    this.x = -50 + (this.targetX + 50) * this.progress;
+                    this.y = (height + 50) + (this.targetY - height - 50) * Math.sin(this.progress * Math.PI / 2);
+                }
+            }
+
+            draw() {
+                if (this.delay > 0) return;
+
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0; // Reset hiệu ứng phát sáng
+            }
+        }
+
+        let particles = [];
+
+        function init() {
+            createTextTargets();
+            particles = [];
+            
+            // Xáo trộn mảng điểm để chữ hiện xuất hiện tự nhiên hơn
+            targets.sort(() => Math.random() - 0.5);
+
+            for (let i = 0; i < targets.length; i++) {
+                // Tạo độ trễ đuôi vệt sáng chạy từ dưới lên
+                let delay = Math.floor(i * 0.15); 
+                particles.push(new Particle(targets[i], delay));
+            }
+        }
+
+        // Vòng lặp hoạt họa Animation Loop
+        function animate() {
+            // Nền hơi mờ nhẹ để tạo hiệu ứng vệt sáng (Trail effect)
+            ctx.fillStyle = 'rgba(5, 5, 5, 0.25)';
+            ctx.fillRect(0, 0, width, height);
+
+            drawStars();
+
+            for (let p of particles) {
+                p.update();
+                p.draw();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        init();
+        animate();
+    </script>
+</body>
+</html>
