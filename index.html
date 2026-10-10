@@ -3,188 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chúc Mừng Sinh Nhật Chị</title>
+    <title>Chúc Mừng Sinh Nhật Chị Yêu Dấu</title>
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-        body, html {
-            width: 100%;
-            height: 100%;
+            background: radial-gradient(circle, #1a0033 0%, #000000 100%);
             overflow: hidden;
-            background-color: #050505;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-        canvas {
-            display: block;
+
+        /* Hiệu ứng bầu trời sao nền */
+        .stars {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
             z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Bóng bay trang trí hai bên */
+        .balloon {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            z-index: 2;
+            animation: floatBalloon 6s infinite ease-in-out alternate;
+        }
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 18px;
+            width: 4px;
+            height: 8px;
+            background: #888;
+        }
+        .balloon-left { left: 10%; background: #ff3366; animation-delay: 0s; box-shadow: inset -5px -5px 15px rgba(0,0,0,0.3), 0 0 10px #ff3366; }
+        .balloon-right { right: 10%; background: #33ccff; animation-delay: 2s; box-shadow: inset -5px -5px 15px rgba(0,0,0,0.3), 0 0 10px #33ccff; }
+
+        @keyframes floatBalloon {
+            0% { transform: translateY(0px) rotate(-5deg); }
+            100% { transform: translateY(-30px) rotate(5deg); }
+        }
+
+        /* Khu vực hiển thị thông điệp chính */
+        .container {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .message {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 15px #ff5722, 0 0 25px #ff9800, 0 0 35px #ffeb3b;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0.5);
+            animation: zoomInText 2.5s forwards ease-out;
+        }
+
+        @keyframes zoomInText {
+            0% {
+                opacity: 0;
+                transform: scale(0.2);
+                letter-spacing: -15px;
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+                letter-spacing: 1px;
+            }
+        }
+
+        .line {
+            display: inline-block;
+            animation: glow 1.5s infinite alternate;
+        }
+
+        .date-text {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-top: 5px;
+            text-shadow: 0 0 10px #00ffff;
+            letter-spacing: 2px;
+            animation: fadeInDate 3s forwards;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #ff5722, 0 0 20px #ff9800; }
+            to { text-shadow: 0 0 20px #ff5722, 0 0 30px #ffeb3b, 0 0 40px #ff9800; }
+        }
+
+        /* Bánh kem & Trái tim */
+        .decor-box {
+            display: flex;
+            gap: 25px;
+            margin-top: 20px;
+            align-items: center;
+            z-index: 3;
+        }
+
+        .cake {
+            font-size: 2.5rem;
+            animation: bounce 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Nút bấm mở quà */
+        .btn-gift {
+            margin-top: 25px;
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+            background: linear-gradient(45deg, #ff3366, #ff9800);
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(255, 87, 34, 0.6);
+            transition: 0.3s ease;
+            z-index: 3;
+        }
+
+        .btn-gift:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 25px rgba(255, 235, 59, 0.9);
+        }
+
+        /* Hộp quà lời chúc ẩn hiện */
+        .secret-message {
+            margin-top: 15px;
+            font-size: 1.3rem;
+            color: #ff99ff;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: 1px dashed #ff3366;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.4);
+            max-width: 80%;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s forwards;
+            z-index: 3;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <canvas id="canvas"></canvas>
+    <!-- Bóng bay trang trí -->
+    <div class="balloon balloon-left"></div>
+    <div class="balloon balloon-right"></div>
+
+    <!-- Bầu trời sao -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Nội dung chính -->
+    <div class="container">
+        <div class="message">
+            <span class="line">🎉 Chúc Mừng Sinh Nhật 🎉</span>
+            <span class="line">Chị Yêu Dấu</span>
+        </div>
+        
+        <div class="date-text">📅 10/10/2026</div>
+
+        <div class="decor-box">
+            <span class="cake">🎂</span>
+            <span class="cake" style="animation-delay: 0.3s;">🎁</span>
+            <span class="cake" style="animation-delay: 0.6s;">💖</span>
+        </div>
+
+        <button class="btn-gift" onclick="revealMessage()">🎁 Xem lời chúc</button>
+
+        <div id="secretText" class="secret-message">
+            💖 Kim Ngân chúc chị tuổi mới vui vẻ, luôn xinh đẹp! 💖
+        </div>
+    </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
+        // Tạo sao nhấp nháy ngẫu nhiên
+        const starsContainer = document.getElementById('stars');
+        const numberOfStars = 150;
 
-        let width = canvas.width = window.innerWidth;
-        let height = canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            init();
-        });
-
-        // 1. Tạo bầu trời sao nền
-        const stars = [];
-        for (let i = 0; i < 200; i++) {
-            stars.push({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                size: Math.random() * 1.5 + 0.5,
-                alpha: Math.random(),
-                speed: Math.random() * 0.02 + 0.005
-            });
-        }
-
-        function drawStars() {
-            for (let star of stars) {
-                star.alpha += star.speed;
-                if (star.alpha > 1 || star.alpha < 0) star.speed = -star.speed;
-                ctx.fillStyle = `rgba(255, 255, 255, ${Math.abs(star.alpha)})`;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-        }
-
-        // 2. Lấy tọa độ các điểm chữ "Chúc mừng sinh nhật" & "Chị yêu dấu"
-        let targets = [];
-        function createTextTargets() {
-            targets = [];
-            const offscreenCanvas = document.createElement('canvas');
-            const offCtx = offscreenCanvas.getContext('2d');
-            offscreenCanvas.width = width;
-            offscreenCanvas.height = height;
-
-            // Tính toán kích thước chữ phù hợp màn hình
-            let fontSize = Math.min(width / 12, 60);
-            offCtx.font = `bold ${fontSize}px Arial`;
-            offCtx.fillStyle = '#ffffff';
-            offCtx.textAlign = 'center';
-
-            // Vẽ chữ lên canvas ẩn
-            offCtx.fillText("Chúc mừng sinh nhật", width / 2, height / 2 - fontSize * 0.7);
-            offCtx.fillText("Chị yêu dấu", width / 2, height / 2 + fontSize * 0.9);
-
-            // Quét các điểm ảnh
-            const imgData = offCtx.getImageData(0, 0, width, height).data;
-            const step = Math.max(2, Math.floor(fontSize / 15)); // Khoảng cách giữa các hạt
-
-            for (let y = 0; y < height; y += step) {
-                for (let x = 0; x < width; x += step) {
-                    const index = (y * width + x) * 4;
-                    if (imgData[index + 3] > 128) { // Điểm hiển thị chữ
-                        targets.push({ x: x, y: y });
-                    }
-                }
-            }
-        }
-
-        // 3. Quản lý Hạt sáng (Particles)
-        class Particle {
-            constructor(target, delay) {
-                this.targetX = target.x;
-                this.targetY = target.y;
-                
-                // Bắt đầu từ góc dưới bên trái
-                this.x = -50;
-                this.y = height + 50;
-
-                this.delay = delay;
-                this.progress = 0;
-                this.speed = 0.012; // Tốc độ chạy vệt
-                this.arrived = false;
-
-                // Màu sắc cháy nổ ngẫu nhiên (Cam, Đỏ, Vàng)
-                const colors = ['#ff4500', '#ff8c00', '#ff2200', '#ffd700', '#ff6347'];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
-                this.size = Math.random() * 2 + 1.5;
-            }
-
-            update() {
-                if (this.delay > 0) {
-                    this.delay--;
-                    return;
-                }
-
-                if (!this.arrived) {
-                    this.progress += this.speed;
-                    if (this.progress >= 1) {
-                        this.progress = 1;
-                        this.arrived = true;
-                    }
-                    // Di chuyển theo đường cong mượt đến vị trí chữ
-                    this.x = -50 + (this.targetX + 50) * this.progress;
-                    this.y = (height + 50) + (this.targetY - height - 50) * Math.sin(this.progress * Math.PI / 2);
-                }
-            }
-
-            draw() {
-                if (this.delay > 0) return;
-
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = this.color;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.shadowBlur = 0; // Reset hiệu ứng phát sáng
-            }
-        }
-
-        let particles = [];
-
-        function init() {
-            createTextTargets();
-            particles = [];
+        for (let i = 0; i < numberOfStars; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
             
-            // Xáo trộn mảng điểm để chữ hiện xuất hiện tự nhiên hơn
-            targets.sort(() => Math.random() - 0.5);
-
-            for (let i = 0; i < targets.length; i++) {
-                // Tạo độ trễ đuôi vệt sáng chạy từ dưới lên
-                let delay = Math.floor(i * 0.15); 
-                particles.push(new Particle(targets[i], delay));
-            }
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            
+            star.style.animationDuration = `${Math.random() * 3 + 1}s`;
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            
+            starsContainer.appendChild(star);
         }
 
-        // Vòng lặp hoạt họa Animation Loop
-        function animate() {
-            // Nền hơi mờ nhẹ để tạo hiệu ứng vệt sáng (Trail effect)
-            ctx.fillStyle = 'rgba(5, 5, 5, 0.25)';
-            ctx.fillRect(0, 0, width, height);
-
-            drawStars();
-
-            for (let p of particles) {
-                p.update();
-                p.draw();
-            }
-
-            requestAnimationFrame(animate);
+        // Hàm hiện lời chúc khi bấm nút
+        function revealMessage() {
+            const secretBox = document.getElementById('secretText');
+            secretBox.style.display = 'block';
         }
-
-        init();
-        animate();
     </script>
 </body>
 </html>
